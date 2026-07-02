@@ -1,0 +1,59 @@
+
+  Dropping all tables ..................................................................................................... 637.11ms DONE
+
+   INFO  Preparing database.  
+
+  Creating migration table ................................................................................................. 87.07ms DONE
+
+   INFO  Running migrations.  
+
+  0001_01_01_000000_create_users_table .................................................................................... 131.52ms DONE
+  0001_01_01_000001_create_cache_table .................................................................................... 130.73ms DONE
+  0001_01_01_000002_create_jobs_table ..................................................................................... 204.06ms DONE
+  2026_07_01_100349_create_roles_table .................................................................................... 113.27ms DONE
+  2026_07_01_100356_create_permissions_table .............................................................................. 118.24ms DONE
+  2026_07_01_100402_create_role_has_permissions_table ..................................................................... 356.44ms DONE
+  2026_07_01_100408_create_model_has_roles_table .......................................................................... 259.85ms DONE
+  2026_07_01_100500_create_suppliers_table ................................................................................ 105.79ms DONE
+  2026_07_01_100501_create_categories_table ............................................................................... 112.82ms DONE
+  2026_07_01_100601_create_products_table ................................................................................. 449.31ms DONE
+  2026_07_01_100700_create_stock_histories_table .......................................................................... 375.81ms DONE
+  2026_07_01_100807_create_purchase_orders_table .......................................................................... 413.02ms DONE
+  2026_07_01_100808_create_purchase_order_items_table ..................................................................... 387.93ms DONE
+  2026_07_01_100809_create_sales_table .................................................................................... 190.45ms DONE
+  2026_07_01_100810_create_sale_items_table ............................................................................... 257.20ms DONE
+
+
+   INFO  Seeding database.  
+
+  Database\Seeders\PermissionSeeder ............................................................................................. RUNNING  
+✅ Permissions seeded successfully.
+  Database\Seeders\PermissionSeeder ......................................................................................... 227 ms DONE  
+
+  Database\Seeders\RoleSeeder ................................................................................................... RUNNING  
+✅ Role [Administrator] seeded with 34 permissions.
+✅ Role [Manager] seeded with 26 permissions.
+✅ Role [Staff] seeded with 4 permissions.
+✅ Role [Sales Person] seeded with 7 permissions.
+✅ Role [Normal User] seeded with 2 permissions.
+  Database\Seeders\RoleSeeder ............................................................................................... 469 ms DONE  
+
+  Database\Seeders\UserSeeder ................................................................................................... RUNNING  
+✅ User [admin@inventory.com] seeded with role [admin].
+✅ User [manager@inventory.com] seeded with role [manager].
+✅ User [staff@inventory.com] seeded with role [staff].
+✅ User [sales@inventory.com] seeded with role [sales_person].
+  Database\Seeders\UserSeeder ............................................................................................. 1,139 ms DONE  
+
+  Database\Seeders\CategorySeeder ............................................................................................... RUNNING  
+✅ Categories seeded.
+  Database\Seeders\CategorySeeder ............................................................................................ 75 ms DONE  
+
+  Database\Seeders\SupplierSeeder ............................................................................................... RUNNING  
+✅ Suppliers seeded.
+  Database\Seeders\SupplierSeeder ............................................................................................ 57 ms DONE  
+
+  Database\Seeders\ProductSeeder ................................................................................................ RUNNING  
+✅ Products seeded (40 regular + 10 low stock).
+  Database\Seeders\ProductSeeder ............................................................................................ 380 ms DONE  
+
