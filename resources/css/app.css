@@ -1,3 +1,552 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Bootstrap 5 core */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* Bootstrap Icons */
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+/* ── Custom Variables ──────────────────────────────────────────
+   Override Bootstrap defaults to match your design's color system.
+   Bootstrap uses CSS custom properties so we override at :root level.
+   This means every Bootstrap component automatically picks up these colors.
+─────────────────────────────────────────────────────────────── */
+:root {
+    --bs-primary: #2563EB;
+    /* Blue — buttons, active states, links */
+    --bs-primary-rgb: 37, 99, 235;
+    --bs-success: #16a34a;
+    /* Green — active badges, add type */
+    --bs-warning: #d97706;
+    /* Orange — low stock alerts */
+    --bs-danger: #dc2626;
+    /* Red — delete, reduce type, errors */
+    --bs-body-bg: #f8f9fa;
+    /* Light gray page background */
+    --bs-body-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --bs-border-radius: 0.5rem;
+    --bs-border-radius-lg: 0.75rem;
+    --bs-card-border-color: #e5e7eb;
+}
+
+/* ── Typography ─────────────────────────────────────────────── */
+body {
+    font-family: var(--bs-body-font-family);
+    font-size: 0.9rem;
+    background-color: var(--bs-body-bg);
+    color: #1f2937;
+}
+
+/* ── Sidebar Layout ─────────────────────────────────────────── */
+
+/*
+ * The sidebar uses a fixed-left layout pattern.
+ * #sidebar is fixed width, #main-content fills the rest.
+ * On mobile, sidebar collapses via Bootstrap's offcanvas component.
+ */
+#sidebar {
+    width: 250px;
+    min-height: 100vh;
+    background-color: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+}
+
+#main-content {
+    margin-left: 250px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease;
+}
+
+/* Sidebar collapsed state — toggled via JS */
+body.sidebar-collapsed #sidebar {
+    transform: translateX(-250px);
+}
+
+body.sidebar-collapsed #main-content {
+    margin-left: 0;
+}
+
+/* ── Sidebar Brand / Logo ───────────────────────────────────── */
+.sidebar-brand {
+    padding: 1.25rem 1.25rem;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+}
+
+.sidebar-brand-icon {
+    width: 36px;
+    height: 36px;
+    background-color: #2563EB;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sidebar-brand-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.3;
+}
+
+.sidebar-brand-text span {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: #6b7280;
+}
+
+/* ── Sidebar Navigation ─────────────────────────────────────── */
+.sidebar-nav {
+    padding: 1rem 0.75rem;
+    flex: 1;
+}
+
+.sidebar-section-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    padding: 0.75rem 0.75rem 0.4rem;
+}
+
+.sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4b5563;
+    text-decoration: none;
+    transition: background-color 0.15s, color 0.15s;
+    margin-bottom: 2px;
+}
+
+.sidebar-nav .nav-link:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: #eff6ff;
+    color: #2563EB;
+    font-weight: 600;
+}
+
+.sidebar-nav .nav-link i {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* ── Top Navbar ─────────────────────────────────────────────── */
+#top-navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.6rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ── Page Content ───────────────────────────────────────────── */
+#page-content {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+/* ── Cards ──────────────────────────────────────────────────── */
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #f3f4f6;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+}
+
+/* ── Tables ─────────────────────────────────────────────────── */
+.table {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+}
+
+.table thead th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.75rem 1rem;
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 0.85rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background-color: #fafafa;
+}
+
+/* ── Badges ─────────────────────────────────────────────────── */
+.badge {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.3em 0.75em;
+    border-radius: 999px;
+}
+
+/* Status-specific badge colors */
+.badge-active {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.badge-inactive {
+    background-color: #f3f4f6;
+    color: #4b5563;
+}
+
+.badge-low-stock {
+    background-color: #ffedd5;
+    color: #c2410c;
+}
+
+.badge-add {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.badge-reduce {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.badge-draft {
+    background-color: #f3f4f6;
+    color: #4b5563;
+}
+
+.badge-ordered {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge-received {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.badge-cancelled {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.badge-confirmed {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.badge-purchase {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge-sale {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+}
+
+.badge-adjustment {
+    background-color: #fef9c3;
+    color: #854d0e;
+}
+
+/* ── Forms ──────────────────────────────────────────────────── */
+.form-control,
+.form-select {
+    border-color: #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.55rem 0.85rem;
+    color: #111827;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #2563EB;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-label {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #374151;
+    margin-bottom: 0.4rem;
+}
+
+.form-text {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.invalid-feedback {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.775rem;
+}
+
+/* ── Buttons ────────────────────────────────────────────────── */
+.btn {
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    padding: 0.55rem 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.15s;
+}
+
+.btn-primary {
+    background-color: #2563EB;
+    border-color: #2563EB;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+    color: #ffffff;
+}
+
+.btn-outline-secondary {
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f9fafb;
+    color: #111827;
+}
+
+/* Icon-only action buttons in tables */
+.btn-action {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.4rem;
+    font-size: 0.875rem;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+}
+
+.btn-action-view {
+    border-color: #bfdbfe;
+    color: #2563EB;
+    background: #fff;
+}
+
+.btn-action-edit {
+    border-color: #fed7aa;
+    color: #ea580c;
+    background: #fff;
+}
+
+.btn-action-delete {
+    border-color: #fecaca;
+    color: #dc2626;
+    background: #fff;
+}
+
+.btn-action-stock {
+    border-color: #bfdbfe;
+    color: #2563EB;
+    background: #fff;
+}
+
+.btn-action-locked {
+    border-color: #e5e7eb;
+    color: #9ca3af;
+    background: #f9fafb;
+    cursor: not-allowed;
+}
+
+.btn-action-view:hover {
+    background-color: #eff6ff;
+}
+
+.btn-action-edit:hover {
+    background-color: #fff7ed;
+}
+
+.btn-action-delete:hover {
+    background-color: #fef2f2;
+}
+
+.btn-action-stock:hover {
+    background-color: #eff6ff;
+}
+
+/* ── Alert / Info Boxes ─────────────────────────────────────── */
+.alert {
+    border-radius: 0.65rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    border: 1px solid transparent;
+}
+
+.alert i {
+    flex-shrink: 0;
+    font-size: 1rem;
+    margin-top: 1px;
+}
+
+/* ── Pagination ─────────────────────────────────────────────── */
+.pagination {
+    margin: 0;
+    gap: 3px;
+}
+
+.page-link {
+    border-radius: 0.4rem !important;
+    border-color: #e5e7eb;
+    color: #374151;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.65rem;
+}
+
+.page-item.active .page-link {
+    background-color: #2563EB;
+    border-color: #2563EB;
+}
+
+/* ── Page Header ────────────────────────────────────────────── */
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.page-header p {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 0.2rem 0 0;
+}
+
+/* ── Flash Messages ─────────────────────────────────────────── */
+.flash-message {
+    border-radius: 0.65rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1.25rem;
+}
+
+/* ── Stat Cards (Dashboard) ─────────────────────────────────── */
+.stat-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.stat-card-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-card-label {
+    font-size: 0.825rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* ── Sidebar Footer ─────────────────────────────────────────── */
+.sidebar-footer {
+    padding: 0.85rem 1.25rem;
+    border-top: 1px solid #f3f4f6;
+    font-size: 0.7rem;
+    color: #9ca3af;
+    text-align: center;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    #sidebar {
+        transform: translateX(-250px);
+    }
+
+    #main-content {
+        margin-left: 0;
+    }
+
+    body.sidebar-open #sidebar {
+        transform: translateX(0);
+    }
+}
