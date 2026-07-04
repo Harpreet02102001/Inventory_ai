@@ -36,8 +36,8 @@
 
 @can('categories.view')
 <a
-    href="#"
-    {{-- href="{{ route('categories.index') }}" — uncomment when CategoryController is built --}}
+
+    href="{{ route('categories.index') }}"
     class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">
     <i class="bi bi-grid"></i>
     Categories
@@ -46,7 +46,7 @@
 
 @can('suppliers.view')
 <a
-    href="#"
+    href="{{ route('suppliers.index')}}"
     {{-- href="{{ route('suppliers.index') }}" — uncomment when SupplierController is built --}}
     class="nav-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
     <i class="bi bi-truck"></i>
@@ -56,7 +56,7 @@
 
 @can('products.view')
 <a
-    href="#"
+    href="{{route('products.index') }}"
     {{-- href="{{ route('products.index') }}" — uncomment when ProductController is built --}}
     class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
     <i class="bi bi-box-seam"></i>

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -79,6 +81,51 @@ Route::middleware(['auth'])->group(function (): void {
             ->name('destroy')->middleware('permission:categories.delete');
     });
 
+    Route::prefix('suppliers')->name('suppliers.')->group(function (): void {
+        Route::get('/', [SupplierController::class, 'index'])
+            ->name('index')->middleware('permission:suppliers.view');
+
+        Route::get('/create', [SupplierController::class, 'create'])
+            ->name('create')->middleware('permission:suppliers.create');
+
+        Route::post('/', [SupplierController::class, 'store'])
+            ->name('store')->middleware('permission:suppliers.create');
+
+        Route::get('/{supplier}', [SupplierController::class, 'show'])
+            ->name('show')->middleware('permission:suppliers.view');
+
+        Route::get('/{supplier}/edit', [SupplierController::class, 'edit'])
+            ->name('edit')->middleware('permission:suppliers.edit');
+
+        Route::put('/{supplier}', [SupplierController::class, 'update'])
+            ->name('update')->middleware('permission:suppliers.edit');
+
+        Route::delete('/{supplier}', [SupplierController::class, 'destroy'])
+            ->name('destroy')->middleware('permission:suppliers.delete');
+    });
+
+    Route::prefix('products')->name('products.')->group(function (): void {
+        Route::get('/', [ProductController::class, 'index'])
+            ->name('index')->middleware('permission:products.view');
+
+        Route::get('/create', [ProductController::class, 'create'])
+            ->name('create')->middleware('permission:products.create');
+
+        Route::post('/', [ProductController::class, 'store'])
+            ->name('store')->middleware('permission:products.create');
+
+        Route::get('/{product}', [ProductController::class, 'show'])
+            ->name('show')->middleware('permission:products.view');
+
+        Route::get('/{product}/edit', [ProductController::class, 'edit'])
+            ->name('edit')->middleware('permission:products.edit');
+
+        Route::put('/{product}', [ProductController::class, 'update'])
+            ->name('update')->middleware('permission:products.edit');
+
+        Route::delete('/{product}', [ProductController::class, 'destroy'])
+            ->name('destroy')->middleware('permission:products.delete');
+    });
 
     // ── Module routes are added below as each module is built ─────────────────
     // Categories  → added when CategoryController is built
