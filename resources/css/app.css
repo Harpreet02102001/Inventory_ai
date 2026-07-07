@@ -550,3 +550,28 @@ body.sidebar-collapsed #main-content {
         transform: translateX(0);
     }
 }
+
+.badge-draft {
+    background-color: #f3f4f6;
+    color: #4b5563;
+}
+
+/* neutral gray — not yet committed */
+.badge-ordered {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* amber — in progress, awaiting delivery */
+.badge-received {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+/* green — same success color as 'active' */
+.badge-cancelled {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* red — clearly distinct, terminal/negative state */

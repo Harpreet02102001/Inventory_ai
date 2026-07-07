@@ -156,4 +156,10 @@ class Product extends Model
             ? asset('storage/' . $this->image)
             : asset('images/placeholder.png');
     }
+    public function updateStockQuantity(Product $product, int $quantity): bool
+    {
+        return $product->update([
+            'stock_quantity' => $quantity,
+        ]);
+    }
 }

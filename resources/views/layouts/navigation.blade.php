@@ -111,10 +111,9 @@
 
 @can('purchase_orders.view')
 <a
-    href="#"
-    {{-- href="{{ route('purchase-orders.index') }}" — uncomment when PurchaseOrderController is built --}}
-    class="nav-link {{ request()->routeIs('purchase-orders.*') ? 'active' : '' }}">
-    <i class="bi bi-cart3"></i>
+    href="{{ route('purchase_orders.index') }}"
+    class="nav-link {{ request()->routeIs('purchase_orders.*') ? 'active' : '' }}">
+    <i class="bi bi-box-seam"></i>
     Purchase Orders
 </a>
 @endcan

@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseOrderController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -125,6 +126,30 @@ Route::middleware(['auth'])->group(function (): void {
 
         Route::delete('/{product}', [ProductController::class, 'destroy'])
             ->name('destroy')->middleware('permission:products.delete');
+    });
+
+
+    Route::prefix('purchase-orders')->name('purchase_orders.')->group(function (): void {
+        Route::get('/', [PurchaseOrderController::class, 'index'])
+            ->name('index')->middleware('permission:purchase_orders.view');
+
+        Route::get('/create', [PurchaseOrderController::class, 'create'])
+            ->name('create')->middleware('permission:purchase_orders.create');
+
+        Route::post('/', [PurchaseOrderController::class, 'store'])
+            ->name('store')->middleware('permission:purchase_orders.create');
+
+        Route::get('/{purchaseOrder}', [PurchaseOrderController::class, 'show'])
+            ->name('show')->middleware('permission:purchase_orders.view');
+
+        Route::patch('/{purchaseOrder}/mark-as-ordered', [PurchaseOrderController::class, 'markAsOrdered'])
+            ->name('mark-as-ordered')->middleware('permission:purchase_orders.edit');
+
+        Route::patch('/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive'])
+            ->name('receive')->middleware('permission:purchase_orders.edit');
+
+        Route::patch('/{purchaseOrder}/cancel', [PurchaseOrderController::class, 'cancel'])
+            ->name('cancel')->middleware('permission:purchase_orders.edit');
     });
 
     // ── Module routes are added below as each module is built ─────────────────

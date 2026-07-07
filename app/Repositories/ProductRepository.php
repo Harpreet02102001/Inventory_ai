@@ -96,4 +96,54 @@ class ProductRepository extends BaseRepository
             ->when($ignoreId, fn($query, $ignoreId) => $query->where('id', '!=', $ignoreId))
             ->exists();
     }
+    /**
+     * Retrieve all active products, narrowed to only the columns a
+     * picker/dropdown UI actually needs.
+     *
+     * Deliberately NOT paginated — a line-item picker on the Purchase
+     * Order form needs the full list to search/select from, not abut that method does not exist in your ProductRepository.
+     * page-by-page browsing experience. Also deliberately narrow on
+     * columns (id, name, sku, purchase_price only) rather than fetching
+     * the whole model — the picker never touches description, image,
+     * stock_quantity, etc., so there's no reason to pull that data over
+     * the wire.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Product> Active products, ordered by name
+     */
+    public function getAllForSelect(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model
+            ->active()
+            ->orderBy('name')
+            ->get(['id', 'name', 'sku', 'purchase_price']);
+    }
+
+    /**
+     * Retrieve a product and lock it for update.
+     *
+     * Used inside database transactions to prevent concurrent
+     * stock updates from modifying the same product at once.
+     *
+     * @param int $id
+     * @return Product|null
+     */
+    public function findForUpdate(int $id): Product
+    {
+        return $this->model->lockForUpdate()->findOrFail($id);
+    }
+    /**
+     * Update a product's stock quantity.
+     *
+     * @param int $productId
+     * @param int $quantity
+     * @return bool
+     */
+    public function updateStockQuantity(int $productId, int $quantity): bool
+    {
+        return $this->model
+            ->whereKey($productId)
+            ->update([
+                'stock_quantity' => $quantity,
+            ]) > 0;
+    }
 }
