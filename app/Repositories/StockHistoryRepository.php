@@ -77,4 +77,20 @@ class StockHistoryRepository extends BaseRepository
     {
         throw new RuntimeException('Stock history records are immutable and cannot be deleted.');
     }
+    /**
+     * Most recent stock changes across ALL products, for the Dashboard's
+     * activity feed — not scoped to one product, unlike getPaginatedForProduct().
+     *
+     * @param int $limit
+     * @return \Illuminate\Database\Eloquent\Collection<int, StockHistory>
+     */
+
+    public function getRecent(int $limit = 10): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model
+            ->with(['product:id,name', 'user:id,name'])
+            ->latest()
+            ->limit($limit)
+            ->get();
+    }
 }

@@ -52,25 +52,16 @@ class StockService
         ?string $remarks = null,
     ): StockHistory {
         return DB::transaction(function () use ($productId, $type, $quantity, $userId, $remarks) {
-            // Row lock held until this transaction commits or rolls back —
-            // prevents two concurrent requests from both reading the same
-            // stale stock_quantity and silently overwriting each other.
             $product = $this->products->findForUpdate($productId);
 
             $oldQuantity = $product->stock_quantity;
 
-            // 'add' and 'purchase' both increase stock; 'reduce' and
-            // 'sale' both decrease it — grouped this way so Purchase
-            // Orders and (soon) Sales can reuse this exact method.
             $increases = in_array($type, ['add', 'purchase'], true);
 
             $newQuantity = $increases
                 ? $oldQuantity + $quantity
                 : $oldQuantity - $quantity;
 
-            // Checked against the LOCKED, current value — not whatever
-            // was on screen when the form was rendered, which could
-            // already be stale by the time this request runs.
             if ($newQuantity < 0) {
                 throw new InsufficientStockException(
                     "Cannot reduce stock by {$quantity} — only {$oldQuantity} currently in stock."
@@ -87,6 +78,48 @@ class StockService
                 'new_quantity'     => $newQuantity,
                 'type'             => $type,
                 'remarks'          => $remarks,
+            ]);
+        });
+    }
+
+    /**
+     * Set a product's stock to an exact quantity, recording the difference
+     * as an 'adjustment' — used to correct drift after a physical stock
+     * count, where the TRUE current count is known but the delta that
+     * caused the discrepancy is not.
+     *
+     * Unlike adjustStock() (which takes a delta the caller already knows),
+     * this takes the target quantity directly and calculates the signed
+     * delta itself for the audit record.
+     *
+     * @param int $productId
+     * @param int $newQuantity The corrected, true stock count
+     * @param int $userId
+     * @param string $reason Mandatory — an adjustment overriding the system's
+     *        count must always be explained, unlike a routine add/reduce
+     * @return StockHistory
+     */
+    public function adjustToExactQuantity(
+        int $productId,
+        int $newQuantity,
+        int $userId,
+        string $reason,
+    ): StockHistory {
+        return DB::transaction(function () use ($productId, $newQuantity, $userId, $reason) {
+            $product = $this->products->findForUpdate($productId);
+            $oldQuantity = $product->stock_quantity;
+            $delta = $newQuantity - $oldQuantity;
+
+            $this->products->updateStockQuantity($product->id, $newQuantity);
+
+            return $this->stockHistories->create([
+                'product_id'       => $product->id,
+                'user_id'          => $userId,
+                'old_quantity'     => $oldQuantity,
+                'changed_quantity' => $delta,
+                'new_quantity'     => $newQuantity,
+                'type'             => 'adjustment',
+                'remarks'          => $reason,
             ]);
         });
     }

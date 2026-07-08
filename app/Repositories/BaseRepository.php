@@ -166,4 +166,16 @@ abstract class BaseRepository
 
         return (bool) $record->delete();
     }
+
+
+    /**
+     * Total count of records in this model's table — a single
+     * SELECT COUNT(*), never loading full rows into memory.
+     *
+     * @return int
+     */
+    public function count(): int
+    {
+        return $this->model->count();
+    }
 }

@@ -3,42 +3,72 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="page-header">
-    <div>
-        @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager'))
-        <h1>Admin Dashboard</h1>
-        <p>Inventory summary and recent stock activity</p>
-        @else
-        <h1>Dashboard</h1>
-        <p>View products and monitor recent inventory activity</p>
-        @endif
-    </div>
-</div>
 
-{{--
-    Temporary dashboard placeholder.
-    This will be replaced with full dashboard widgets
-    (stat cards, low stock table, recent stock updates)
-    when we build the Dashboard module.
+<x-ui.page-header title="Dashboard" subtitle="Welcome back, {{ auth()->user()->name }}" />
 
-    For now it confirms the layout, navigation, and
-    authentication are all working correctly.
---}}
-<div class="card p-4">
-    <div class="d-flex align-items-center gap-3">
-        <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center"
-            style="width:48px; height:48px; flex-shrink:0;">
-            <i class="bi bi-check-lg text-success fs-4"></i>
-        </div>
-        <div>
-            <h6 class="mb-0 fw-semibold">Welcome back, {{ Auth::user()->name }}</h6>
-            <p class="mb-0 text-muted small">
-                You are signed in as
-                <span class="badge bg-primary bg-opacity-10 text-primary ms-1">
-                    {{ Auth::user()->roles->first()?->display_name ?? 'User' }}
-                </span>
-            </p>
+@if($widgets->isNotEmpty())
+<div class="row g-3 mb-4">
+    @foreach($widgets as $widget)
+    <div class="col-md-3">
+        <div class="card {{ $widget->highlight ? 'border-warning' : '' }}">
+            <div class="card-body">
+                <div class="text-muted small">
+                    <i class="bi {{ $widget->icon }}"></i> {{ $widget->label }}
+                </div>
+                <div class="fs-3 fw-bold {{ $widget->highlight ? 'text-warning' : '' }}">
+                    {{ $widget->value }}
+                </div>
+                @if($widget->link)
+                <a href="{{ $widget->link }}" class="small">View all →</a>
+                @endif
+            </div>
         </div>
     </div>
+    @endforeach
 </div>
+@endif
+
+@if($recentStockActivity !== null)
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <strong>Recent Stock Activity</strong>
+        <a href="{{ route('stock.index') }}" class="small">View all products →</a>
+    </div>
+
+    @if($recentStockActivity->isEmpty())
+    <x-ui.empty-state icon="bi-clock-history" title="No recent activity"
+        description="Stock changes will appear here as they happen." />
+    @else
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Change</th>
+                    <th>New Qty</th>
+                    <th>By</th>
+                    <th>When</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($recentStockActivity as $entry)
+                <tr>
+                    <td>{{ $entry->product->name }}</td>
+                    <td><span class="badge {{ $entry->changed_quantity >= 0 ? 'badge-active' : 'badge-inactive' }}">{{ ucfirst($entry->type) }}</span></td>
+                    <td class="{{ $entry->changed_quantity >= 0 ? 'text-success' : 'text-danger' }}">
+                        {{ $entry->changed_quantity >= 0 ? '+' : '' }}{{ $entry->changed_quantity }}
+                    </td>
+                    <td>{{ $entry->new_quantity }}</td>
+                    <td class="small">{{ $entry->user->name }}</td>
+                    <td class="text-muted small">{{ $entry->created_at->diffForHumans() }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+</div>
+@endif
+
 @endsection

@@ -11,6 +11,8 @@ use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\StockController;
+use App\Http\Controllers\DashboardController;
 
 /**
  * Web Routes
@@ -45,9 +47,9 @@ Route::middleware(['auth'])->group(function (): void {
      * The view itself renders different widgets based on the user's permissions,
      * so admin sees full stats while staff sees only low stock + recent updates.
      */
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->middleware('permission:dashboard.view')->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard')
+        ->middleware('permission:dashboard.view');
 
     /**
      * Profile
@@ -191,6 +193,28 @@ Route::middleware(['auth'])->group(function (): void {
         Route::put('/{user}', [UserController::class, 'update'])->name('update')->middleware('permission:users.edit');
     });
 
+    Route::prefix('products/{product}/stock')->name('stock.')->group(function (): void {
+        Route::get('/', [StockController::class, 'edit'])
+            ->name('edit')->middleware('permission:stock.update');
+
+        Route::put('/', [StockController::class, 'update'])
+            ->name('update')->middleware('permission:stock.update');
+
+        Route::get('/adjust', [StockController::class, 'adjustForm'])
+            ->name('adjust-form')->middleware('permission:stock.adjust');
+
+        Route::post('/adjust', [StockController::class, 'adjust'])
+            ->name('adjust')->middleware('permission:stock.adjust');
+    });
+
+    Route::prefix('stock')->name('stock.')->group(function (): void {
+        Route::get('/', [StockController::class, 'index'])
+            ->name('index')->middleware('permission:stock.view');
+    });
+
+    // This sits ALONGSIDE the existing products/{product}/stock group — two
+    // separate prefixes, both named stock.*, which is fine since the route
+    // names themselves (index vs edit vs update) don't collide.
     // ── Module routes are added below as each module is built ─────────────────
     // Categories  → added when CategoryController is built
     // Suppliers   → added when SupplierController is built
