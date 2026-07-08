@@ -575,3 +575,10 @@ body.sidebar-collapsed #main-content {
 }
 
 /* red — clearly distinct, terminal/negative state */
+
+.badge-confirmed {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+/* same green as 'received' — both mean "completed successfully" */

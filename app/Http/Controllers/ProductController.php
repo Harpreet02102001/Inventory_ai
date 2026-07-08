@@ -107,10 +107,11 @@ class ProductController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($data): void {
-                $this->products->create($data);
-            });
+            DB::beginTransaction();
+            $this->products->create($data);
+            DB::commit();
         } catch (Throwable $e) {
+            DB::rollBack();
             // Roll back the file upload manually, since the DB transaction
             // couldn't do it for us.
             if ($imagePath) {

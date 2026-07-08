@@ -91,8 +91,8 @@
 
 @can('users.view')
 <a
-    href="#"
-    {{-- href="{{ route('users.index') }}" — uncomment when UserController is built --}}
+
+    href="{{ route('users.index') }}"
     class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
     <i class="bi bi-people"></i>
     Users
@@ -101,8 +101,7 @@
 
 @can('roles.view')
 <a
-    href="#"
-    {{-- href="{{ route('roles.index') }}" — uncomment when RoleController is built --}}
+    href="{{ route('roles.index') }}"
     class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
     <i class="bi bi-shield-check"></i>
     Roles
@@ -119,9 +118,7 @@
 @endcan
 
 @can('sales.view')
-<a
-    href="#"
-    {{-- href="{{ route('sales.index') }}" — uncomment when SaleController is built --}}
+<a href="{{ route('sales.index') }}"
     class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}">
     <i class="bi bi-receipt"></i>
     Sales

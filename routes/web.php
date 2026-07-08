@@ -7,7 +7,10 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 
 /**
  * Web Routes
@@ -150,6 +153,42 @@ Route::middleware(['auth'])->group(function (): void {
 
         Route::patch('/{purchaseOrder}/cancel', [PurchaseOrderController::class, 'cancel'])
             ->name('cancel')->middleware('permission:purchase_orders.edit');
+    });
+
+    Route::prefix('sales')->name('sales.')->group(function (): void {
+        Route::get('/', [SaleController::class, 'index'])
+            ->name('index')->middleware('permission:sales.view');
+
+        Route::get('/create', [SaleController::class, 'create'])
+            ->name('create')->middleware('permission:sales.create');
+
+        Route::post('/', [SaleController::class, 'store'])
+            ->name('store')->middleware('permission:sales.create');
+
+        Route::get('/{sale}', [SaleController::class, 'show'])
+            ->name('show')->middleware('permission:sales.view');
+
+        Route::patch('/{sale}/confirm', [SaleController::class, 'confirm'])
+            ->name('confirm')->middleware('permission:sales.edit');
+
+        Route::patch('/{sale}/cancel', [SaleController::class, 'cancel'])
+            ->name('cancel')->middleware('permission:sales.edit');
+    });
+    Route::prefix('roles')->name('roles.')->group(function (): void {
+        Route::get('/', [RoleController::class, 'index'])->name('index')->middleware('permission:roles.view');
+        Route::get('/create', [RoleController::class, 'create'])->name('create')->middleware('permission:roles.create');
+        Route::post('/', [RoleController::class, 'store'])->name('store')->middleware('permission:roles.create');
+        Route::get('/{role}/edit', [RoleController::class, 'edit'])->name('edit')->middleware('permission:roles.edit');
+        Route::put('/{role}', [RoleController::class, 'update'])->name('update')->middleware('permission:roles.edit');
+        Route::delete('/{role}', [RoleController::class, 'destroy'])->name('destroy')->middleware('permission:roles.delete');
+    });
+
+    Route::prefix('users')->name('users.')->group(function (): void {
+        Route::get('/', [UserController::class, 'index'])->name('index')->middleware('permission:users.view');
+        Route::get('/create', [UserController::class, 'create'])->name('create')->middleware('permission:users.create');
+        Route::post('/', [UserController::class, 'store'])->name('store')->middleware('permission:users.create');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit')->middleware('permission:users.edit');
+        Route::put('/{user}', [UserController::class, 'update'])->name('update')->middleware('permission:users.edit');
     });
 
     // ── Module routes are added below as each module is built ─────────────────

@@ -27,6 +27,8 @@
 'received' => ['badge-received', 'Received'],
 'cancelled' => ['badge-cancelled', 'Cancelled'],
 'confirmed' => ['badge-confirmed', 'Confirmed'],
+'confirmed' => ['badge-confirmed', 'Confirmed'],
+
 
 default => ['badge-inactive', ucfirst($status)],
 };
