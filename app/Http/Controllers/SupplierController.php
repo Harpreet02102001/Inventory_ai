@@ -38,7 +38,6 @@ class SupplierController extends Controller
     public function index(Request $request): View
     {
         $suppliers = $this->suppliers->getPaginatedWithSearch(
-            perPage: 15,
             search: $request->query('search'),
         );
 

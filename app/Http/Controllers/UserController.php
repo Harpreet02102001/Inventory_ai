@@ -47,7 +47,7 @@ class UserController extends Controller
     public function index(Request $request): View
     {
         return view('users.index', [
-            'users'  => $this->users->getPaginatedWithSearch(15, $request->query('search')),
+            'users'  => $this->users->getPaginatedWithSearch(10, $request->query('search')),
             'search' => $request->query('search', ''),
         ]);
     }

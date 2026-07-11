@@ -38,6 +38,8 @@ class CategoryRepository extends BaseRepository
      * @param string|null $search Optional search term matched against name
      * @return LengthAwarePaginator
      */
+
+    
     public function getPaginatedWithSearch(
         int $perPage = 10,
         ?string $search = null

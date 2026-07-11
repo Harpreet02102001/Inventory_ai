@@ -109,7 +109,7 @@
         <small class="text-muted">
             Showing {{ $suppliers->firstItem() }}–{{ $suppliers->lastItem() }} of {{ $suppliers->total() }}
         </small>
-        {{ $suppliers->links() }}
+        {{ $suppliers->links('pagination::bootstrap-5') }}
     </div>
     @endif
 </div>

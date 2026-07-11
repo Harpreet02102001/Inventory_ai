@@ -111,7 +111,7 @@
         <small class="text-muted">
             Showing {{ $categories->firstItem() }}–{{ $categories->lastItem() }} of {{ $categories->total() }}
         </small>
-        {{ $categories->links() }}
+        {{ $categories->links('pagination::bootstrap-5') }}
     </div>
     @endif
 </div>

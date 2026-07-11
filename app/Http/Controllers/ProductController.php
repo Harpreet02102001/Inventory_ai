@@ -48,7 +48,6 @@ class ProductController extends Controller
     public function index(Request $request): View
     {
         $products = $this->products->getPaginatedWithFilters(
-            perPage: 15,
             search: $request->query('search'),
             categoryId: $request->query('category_id') ? (int) $request->query('category_id') : null,
             supplierId: $request->query('supplier_id') ? (int) $request->query('supplier_id') : null,

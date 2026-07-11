@@ -71,7 +71,7 @@
     Stock
 </a>
 @endcan
-
+<!-- 
 {{-- Second one — Low Stock shortcut --}}
 @can('stock.view')
 <a href="{{ route('stock.index', ['low_stock' => 1]) }}"
@@ -79,7 +79,7 @@
     <i class="bi bi-exclamation-triangle {{ request()->routeIs('stock.lowstock*') ? '' : 'text-warning' }}"></i>
     Low Stock
 </a>
-@endcan
+@endcan -->
 
 
 @can('stock.view')

@@ -31,7 +31,7 @@ class UserRepository extends BaseRepository
      * @return LengthAwarePaginator
      */
     public function getPaginatedWithSearch(
-        int $perPage = 15,
+        int $perPage = 10,
         ?string $search = null,
     ): LengthAwarePaginator {
         return $this->model

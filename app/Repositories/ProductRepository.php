@@ -42,7 +42,7 @@ class ProductRepository extends BaseRepository
      * @return LengthAwarePaginator
      */
     public function getPaginatedWithFilters(
-        int $perPage = 15,
+        int $perPage = 10,
         ?string $search = null,
         ?int $categoryId = null,
         ?int $supplierId = null,

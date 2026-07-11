@@ -44,7 +44,7 @@ class SupplierRepository extends BaseRepository
      * @return LengthAwarePaginator
      */
     public function getPaginatedWithSearch(
-        int $perPage = 5,
+        int $perPage = 10,
         ?string $search = null
     ): LengthAwarePaginator {
         return $this->model

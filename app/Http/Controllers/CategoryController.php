@@ -41,7 +41,6 @@ class CategoryController extends Controller
     public function index(Request $request): View
     {
         $categories = $this->categories->getPaginatedWithSearch(
-            perPage: 15,
             search: $request->query('search'),
         );
 

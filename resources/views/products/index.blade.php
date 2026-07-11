@@ -143,7 +143,7 @@
         <small class="text-muted">
             Showing {{ $products->firstItem() }}–{{ $products->lastItem() }} of {{ $products->total() }}
         </small>
-        {{ $products->links() }}
+        {{ $products->links('pagination::bootstrap-5') }}
     </div>
     @endif
 </div>

@@ -4,37 +4,48 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * BaseRepository
  *
- * Abstract base class providing common Eloquent database operations
- * shared across every concrete repository in the application (Category,
- * Supplier, Product, and so on). Each concrete repository extends this
- * class and receives these methods for free — only module-specific
- * query logic needs to be written in the child class.
+ * Abstract base class providing standard database operations for all repositories.
  *
- * Why abstract? This class is a template, not a finished tool — it has
- * no model of its own to query until a child class supplies one via
- * its constructor. PHP refuses `new BaseRepository()` directly, which
- * catches misuse at compile time instead of failing confusingly later.
+ * TWO TIERS:
  *
- * Design principle: DRY (Don't Repeat Yourself). If pagination defaults
- * or the delete behavior ever need to change globally, this is the one
- * place to change it — every repository picks up the update automatically.
+ * Tier 1 - Reference Data (small, stable tables):
+ *   └─ RoleRepository, PermissionRepository
+ *   └─ Use: getAll(), getActiveForSelect(), count()
+ *   └─ NO pagination needed
+ *
+ * Tier 2 - Transactional Data (large, frequently queried):
+ *   └─ ProductRepository, UserRepository, SaleRepository, etc.
+ *   └─ Use: getFiltered(), getPaginated(), getActiveForSelect()
+ *   └─ Pagination required
+ *
+ * All repositories inherit these standard methods.
+ * Concrete repos override as needed for their specific filters.
+ *
+ * NAMING CONVENTION (ALL repositories follow this):
+ *   - findById(id)              → single record or null
+ *   - findOrFail(id)            → single record or 404
+ *   - getAll()                  → all records (reference data only)
+ *   - getActive()               → all active records
+ *   - getActiveForSelect()      → active records for dropdowns (minimal columns)
+ *   - getFiltered(filters)      → paginated with module-specific filters
+ *   - getPaginated(perPage)     → simple pagination, no filters
+ *   - create(data)              → insert new record
+ *   - update(id, data)          → update existing record
+ *   - delete(id)                → soft or hard delete
+ *   - count()                   → total records
+ *   - countActive()             → active records only
  */
 abstract class BaseRepository
 {
     /**
      * The Eloquent model instance this repository operates on.
-     *
-     * Set once, in the constructor, by whichever concrete repository
-     * extends this class. Every method below queries through this
-     * property rather than referencing a model class name directly —
-     * that's what lets one BaseRepository serve every module.
      *
      * @var Model
      */
@@ -43,25 +54,24 @@ abstract class BaseRepository
     /**
      * BaseRepository constructor.
      *
-     * Concrete repositories call parent::__construct($model) and pass
-     * in their specific model instance (e.g. a fresh Category), wiring
-     * every inherited method to the correct database table.
-     *
-     * @param Model $model The Eloquent model instance for this repository
+     * @param  Model  $model  The Eloquent model instance for this repository
      */
     public function __construct(Model $model)
     {
         $this->model = $model;
     }
 
+    // ────────────────────────────────────────────────────────────────────
+    // BASIC CRUD OPERATIONS
+    // ────────────────────────────────────────────────────────────────────
+
     /**
      * Find a single record by its primary key.
      *
-     * Returns null when nothing is found — use findOrFail() instead
-     * when a missing record should trigger an automatic 404 response.
+     * Returns null if not found. Use findOrFail() for 404 behavior.
      *
-     * @param int $id Primary key to search for
-     * @return Model|null The matching model, or null if not found
+     * @param  int  $id  Primary key value
+     * @return Model|null
      */
     public function findById(int $id): ?Model
     {
@@ -69,13 +79,13 @@ abstract class BaseRepository
     }
 
     /**
-     * Find a record by primary key, or throw a ModelNotFoundException.
+     * Find a record by primary key or throw ModelNotFoundException.
      *
-     * Laravel automatically converts this exception into an HTTP 404
-     * response, so controllers never need to check for null manually.
+     * Laravel automatically converts this to a 404 HTTP response.
+     * Use this in show(), edit(), update(), destroy() controller methods.
      *
-     * @param int $id Primary key to search for
-     * @return Model The matching model instance
+     * @param  int  $id  Primary key value
+     * @return Model
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
@@ -85,13 +95,12 @@ abstract class BaseRepository
     }
 
     /**
-     * Retrieve every record from this model's table, unpaginated.
+     * Retrieve ALL records without any filters or pagination.
      *
-     * Use sparingly — fine for small reference tables (like Categories),
-     * risky for anything that could grow to thousands of rows. Prefer
-     * getPaginated() for tables without a known small upper bound.
+     * ⚠️ USE ONLY for small reference data tables (roles, permissions, statuses).
+     * For large tables, use getFiltered() or getPaginated() instead.
      *
-     * @return Collection<int, Model> All records as an Eloquent collection
+     * @return Collection<int, Model>
      */
     public function getAll(): Collection
     {
@@ -99,30 +108,10 @@ abstract class BaseRepository
     }
 
     /**
-     * Retrieve records paginated, most recent first.
+     * Create a new record with the given validated data.
      *
-     * Returns a LengthAwarePaginator, which Blade renders directly via
-     * {{ $records->links() }} — Laravel builds the page-number links
-     * (and preserves any query string, when withQueryString() is chained
-     * in a child repository's own override) automatically.
-     *
-     * @param int $perPage Number of records per page (default: 15)
-     * @return LengthAwarePaginator
-     */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
-    {
-        return $this->model->latest()->paginate($perPage);
-    }
-
-    /**
-     * Create a new record from the given data.
-     *
-     * $data is expected to already be validated and filtered — that
-     * happens upstream, in a Form Request — this method trusts its
-     * input completely and simply persists it.
-     *
-     * @param array<string, mixed> $data Validated field values to insert
-     * @return Model The newly created model, with its ID populated
+     * @param  array<string, mixed>  $data  Validated field values
+     * @return Model  The newly created instance with ID populated
      */
     public function create(array $data): Model
     {
@@ -132,14 +121,12 @@ abstract class BaseRepository
     /**
      * Update an existing record by its primary key.
      *
-     * Fetches the record first (throwing a 404 if missing), applies the
-     * update, then calls fresh() to reload it from the database — this
-     * matters if any database-level defaults or triggers could have
-     * changed values beyond what was just written.
+     * Calls fresh() to return the record reloaded from the database,
+     * ensuring any DB-level triggers or default values are reflected.
      *
-     * @param int $id Primary key of the record to update
-     * @param array<string, mixed> $data Validated field values to update
-     * @return Model The updated record, freshly reloaded from the database
+     * @param  int                   $id    Primary key
+     * @param  array<string, mixed>  $data  Validated field values to update
+     * @return Model  The updated instance, freshly reloaded from DB
      */
     public function update(int $id, array $data): Model
     {
@@ -152,13 +139,11 @@ abstract class BaseRepository
     /**
      * Delete a record by its primary key.
      *
-     * If the model uses the SoftDeletes trait (as Category and Supplier
-     * do), this performs a soft delete — it sets deleted_at rather than
-     * removing the row. A true permanent delete would require calling
-     * forceDelete() explicitly, which no repository does by default.
+     * If the model uses SoftDeletes trait, this performs a soft delete
+     * (sets deleted_at timestamp). Hard deletion requires forceDelete().
      *
-     * @param int $id Primary key of the record to delete
-     * @return bool True if the delete succeeded
+     * @param  int  $id  Primary key
+     * @return bool  True if deleted successfully
      */
     public function delete(int $id): bool
     {
@@ -167,15 +152,137 @@ abstract class BaseRepository
         return (bool) $record->delete();
     }
 
+    // ────────────────────────────────────────────────────────────────────
+    // COUNT OPERATIONS
+    // ────────────────────────────────────────────────────────────────────
 
     /**
-     * Total count of records in this model's table — a single
-     * SELECT COUNT(*), never loading full rows into memory.
+     * Total count of all records (includes soft-deleted if model uses SoftDeletes).
      *
      * @return int
      */
     public function count(): int
     {
         return $this->model->count();
+    }
+
+    /**
+     * Count of active records only.
+     *
+     * Uses the scopeActive() defined on the model.
+     *
+     * @return int
+     */
+    public function countActive(): int
+    {
+        return $this->model->active()->count();
+    }
+
+    // ────────────────────────────────────────────────────────────────────
+    // PAGINATION & FILTERING (Tier 2: Transactional Data)
+    // ────────────────────────────────────────────────────────────────────
+
+    /**
+     * Simple pagination without filters — ordered by latest.
+     *
+     * Use this for simple list views with no search/filter UI.
+     * Most views should use getFiltered() instead.
+     *
+     * @param  int  $perPage  Records per page (default: 15)
+     * @return LengthAwarePaginator
+     */
+    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->model
+            ->latest()
+            ->paginate($perPage);
+    }
+
+    /**
+     * Paginated records with optional module-specific filters.
+     *
+     * CONCRETE REPOSITORIES OVERRIDE THIS to add their own filter logic.
+     * This base implementation just returns everything paginated.
+     *
+     * Example override in ProductRepository:
+     *
+     *   public function getFiltered(array $filters = []): LengthAwarePaginator
+     *   {
+     *       return $this->model
+     *           ->when(
+     *               $filters['search'] ?? null,
+     *               fn($q, $search) => $q->where('name', 'like', "%{$search}%")
+     *           )
+     *           ->when(
+     *               $filters['category_id'] ?? null,
+     *               fn($q, $catId) => $q->where('category_id', $catId)
+     *           )
+     *           ->when(
+     *               $filters['status'] ?? null,
+     *               fn($q, $status) => $q->where('status', $status)
+     *           )
+     *           ->latest()
+     *           ->paginate($filters['perPage'] ?? 15)
+     *           ->withQueryString();
+     *   }
+     *
+     * @param  array<string, mixed>  $filters  Module-specific filters
+     * @return LengthAwarePaginator
+     */
+    public function getFiltered(array $filters = []): LengthAwarePaginator
+    {
+        return $this->model
+            ->latest()
+            ->paginate($filters['perPage'] ?? 15)
+            ->withQueryString();
+    }
+
+    // ────────────────────────────────────────────────────────────────────
+    // SELECT/DROPDOWN OPERATIONS (All Repositories)
+    // ────────────────────────────────────────────────────────────────────
+
+    /**
+     * All active records in minimal form for dropdown/select elements.
+     *
+     * Returns ONLY id and the model's display column (name, display_name, company_name, etc.)
+     * to minimize data transfer and memory usage.
+     *
+     * Ordered alphabetically by name for better UX in dropdowns.
+     *
+     * CONCRETE REPOSITORIES OVERRIDE THIS to specify exact columns and ordering.
+     *
+     * Example override in ProductRepository:
+     *
+     *   public function getActiveForSelect(): Collection
+     *   {
+     *       return $this->model
+     *           ->active()
+     *           ->orderBy('name')
+     *           ->get(['id', 'name', 'sku']);
+     *   }
+     *
+     * @return Collection<int, Model>  Active records with minimal columns
+     */
+    public function getActiveForSelect(): Collection
+    {
+        return $this->model
+            ->active()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
+    /**
+     * All active records (full models, not just for dropdowns).
+     *
+     * Use when you need the entire model object, not just for selects.
+     *
+     * @return Collection<int, Model>
+     */
+    public function getActive(): Collection
+    {
+        return $this->model
+            ->active()
+            ->orderBy('name')
+            ->get();
     }
 }

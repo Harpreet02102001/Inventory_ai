@@ -39,17 +39,42 @@ class EnsureUserIsActive
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && ! Auth::user()->isActive()) {
-            // Full logout sequence — invalidate session and regenerate CSRF token
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+        if (Auth::check()) {
+            $user = Auth::user();
 
-            return redirect()
-                ->route('login')
-                ->withErrors([
-                    'email' => 'Your account has been deactivated. Please contact an administrator.',
-                ]);
+            // Determine active state in a backward-compatible way.
+            if (method_exists($user, 'isActive')) {
+                $isActive = (bool) $user->isActive();
+            } elseif (isset($user->active)) {
+                $isActive = (bool) $user->active;
+            } elseif (isset($user->is_active)) {
+                $isActive = (bool) $user->is_active;
+            } else {
+                // Fall back to attribute retrieval if available, otherwise assume active
+                $isActive = true;
+                if (method_exists($user, 'getAttribute')) {
+                    $attr = $user->getAttribute('active');
+                    if ($attr === null) {
+                        $attr = $user->getAttribute('is_active');
+                    }
+                    if ($attr !== null) {
+                        $isActive = (bool) $attr;
+                    }
+                }
+            }
+
+            if (! $isActive) {
+                // Full logout sequence — invalidate session and regenerate CSRF token
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()
+                    ->route('login')
+                    ->withErrors([
+                        'email' => 'Your account has been deactivated. Please contact an administrator.',
+                    ]);
+            }
         }
 
         return $next($request);
